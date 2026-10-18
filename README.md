@@ -31,7 +31,8 @@ O custo é honesto: software próprio é manutenção própria.
 
 Modelo: `turbo` (`large-v3-turbo`) com `compute_type="int8"` roda bem em CPU de 16 threads.
 Medido numa Ryzen 9 7940HS: **~6 s para transcrever 10 s de fala**, +2 s de refino. Modelos
-`small`/`medium`/`base` podem já estar no cache do Hugging Face — confira antes de baixar 1,6 GB.
+`small`/`medium`/`base` podem já estar no cache do Hugging Face — confira antes de baixar.
+O primeiro uso baixa o modelo em silêncio (~2 GB medidos em `~/.cache/huggingface`).
 
 ## Instalação
 
