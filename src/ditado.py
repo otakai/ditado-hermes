@@ -49,7 +49,12 @@ BIPE = {"inicio": "/tmp/ditado-inicio.wav", "fim": "/tmp/ditado-fim.wav", "erro"
 
 
 def avisar(titulo, corpo="", som=None):
-    subprocess.run(["notify-send", "-a", "Ditado", "-t", "2500", titulo, corpo],
+    # --transient: o aviso não fica no histórico de notificações.
+    # x-canonical-private-synchronous: a notificação nova SUBSTITUI a anterior em vez de empilhar.
+    # Sem as duas coisas, cada ditado deixava três avisos na bandeja, e eles reapareciam
+    # todos quando a sessão era retomada depois da tela de descanso.
+    subprocess.run(["notify-send","--transient","--app-name=Ditado","-t","1500",
+                    "-h","string:x-canonical-private-synchronous:ditado", titulo, corpo],
                    check=False, capture_output=True)
     if som and os.path.exists(som):
         subprocess.run(["pw-play", som], check=False, capture_output=True)
