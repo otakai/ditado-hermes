@@ -318,7 +318,9 @@ def ciclo():
     print("vigia de /dev/input: %s" % ("ativo" if vigia else "indisponível"), flush=True)
     modelo()
     teclado()
-    avisar("Ditado pronto", "Toque no Alt direito para falar. Outro toque para parar.", BIPE["fim"])
+    # Nada de notificação na partida. O serviço reinicia em várias situações (retomada da
+    # sessão, atualização, remapeamento), e cada partida deixava um aviso que reaparecia na
+    # tela de login. O estado "pronto" fica só no log, onde é consultável.
     print("pronto — toque no Alt direito", flush=True)
 
     gravador = Gravador()
