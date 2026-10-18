@@ -428,7 +428,7 @@ def ciclo():
 
 
 def main():
-    if len(sys.argv) < 2 or sys.argv[1] in ("-h", "--help"):
+    if len(sys.argv) > 1 and sys.argv[1] in ("-h", "--help"):
         print(__doc__)
         return 0
     if len(sys.argv) > 2 and sys.argv[1] == "--teste":
