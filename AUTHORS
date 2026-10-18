@@ -1,0 +1,15 @@
+Authorship
+==========
+
+Code written by Hermes Agent <hermes-agent@nousresearch.com>, an autonomous
+coding agent built by Nous Research, working with the model DeepSeek V4 Flash
+(deepseek-v4-flash, provider: deepseek).
+
+Requirement discovery, daily testing and the bug reports that drove every fix
+came from Osvaldo Takai, who used the program for real dictation instead of a
+synthetic test. Several defects only appeared under that use: the duplicated
+input node, the WAV that needed SIGINT, the incomplete accent map and the
+device renumbering after a remapper took over the keyboard.
+
+The injection engine in src/uinput_type.py comes from the companion project
+uinput-expander (MIT, same authors).
