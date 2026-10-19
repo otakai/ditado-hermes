@@ -1,0 +1,15 @@
+# Versões conhecidas boas (medidas em duas máquinas diferentes).
+#
+# O ponto crítico é o PyAV: o faster-whisper 1.2.1 chama
+#     av.open(arquivo, mode="r", metadata_errors="ignore")
+# e o PyAV 19 REMOVEU esse parâmetro. Com av>=19 toda transcrição morre com
+#     TypeError: open() got an unexpected keyword argument 'metadata_errors'
+# O faster-whisper declara só "av>=11", então o pip instala a 19 e quebra.
+# Por isso o pin abaixo.
+#
+# Instalação:
+#   python3 -m venv ~/.local/venvs/ditado
+#   ~/.local/venvs/ditado/bin/pip install -r requirements.txt
+
+faster-whisper==1.2.1
+av==18.0.0

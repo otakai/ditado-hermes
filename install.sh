@@ -23,7 +23,8 @@ check() {
   if eval "$2" >/dev/null 2>&1; then echo "  ok: $1"; else echo "  FALTA: $1  ($3)"; falta=1; fi
 }
 check "Python 3.11+"        "\"$PYTHON\" -c 'import sys; sys.exit(0 if sys.version_info>=(3,11) else 1)'" "instale python3 (ou aponte PYTHON= para um venv)"
-check "faster-whisper"      "\"$PYTHON\" -c 'import faster_whisper'"                                   "pip install faster-whisper no interpretador acima"
+check "faster-whisper"      "\"$PYTHON\" -c 'import faster_whisper'"                                   "pip install -r requirements.txt no interpretador acima"
+check "PyAV < 19"           "\"$PYTHON\" -c 'import importlib.metadata as m; raise SystemExit(0 if int(m.version(\"av\").split(\".\")[0]) < 19 else 1)'" "av>=19 removeu metadata_errors e quebra toda transcrição: pip install 'av==18.0.0'"
 check "pw-record"           "command -v pw-record"                                                     "pacote pipewire-bin"
 check "pw-play"             "command -v pw-play"                                                       "pacote pipewire-bin"
 check "notify-send"         "command -v notify-send"                                                   "pacote libnotify-bin"

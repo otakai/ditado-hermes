@@ -23,7 +23,7 @@ O custo é honesto: software próprio é manutenção própria.
 | peça | para quê |
 |---|---|
 | Python 3.11+ | o programa |
-| `faster-whisper` | reconhecimento de fala local |
+| `faster-whisper` + `av<19` | reconhecimento de fala local (versões em `requirements.txt`) |
 | PipeWire (`pw-record`, `pw-play`) | captura e avisos sonoros |
 | grupo `input` | ler o teclado e criar o teclado virtual |
 | `notify-send` | avisos de estado |
@@ -39,8 +39,18 @@ O primeiro uso baixa o modelo em silêncio (~2 GB medidos em `~/.cache/huggingfa
 ```bash
 git clone https://github.com/otakai/ditado-hermes.git
 cd ditado-hermes
-./install.sh
+
+# o motor de fala pede um ambiente próprio (a base é externally-managed)
+python3 -m venv ~/.local/venvs/ditado
+~/.local/venvs/ditado/bin/pip install -r requirements.txt
+
+PATH=$HOME/.local/venvs/ditado/bin:$PATH ./install.sh
 ```
+
+O `requirements.txt` existe por um motivo específico: o **PyAV 19 removeu o parâmetro
+`metadata_errors`** que o `faster-whisper` usa, e o pacote declara apenas `av>=11` — então o pip
+instala a 19 e **toda transcrição falha** com `TypeError: open() got an unexpected keyword
+argument 'metadata_errors'`. O `install.sh` confere isso e recusa instalar com `av>=19`.
 
 O `install.sh` não usa `root`. Ele confere as dependências, copia o programa para `~/.local/bin/ditado`,
 instala o serviço de usuário e avisa se você não estiver no grupo `input`.
@@ -81,6 +91,15 @@ de meio segundo; AltGr usado para digitar símbolo nunca dispara o ditado.
 O serviço sobe com a sessão (`systemctl --user status ditado`).
 
 ## Problemas conhecidos (medidos, não supostos)
+
+**PyAV 19 quebra toda transcrição.** O `faster-whisper` chama
+`av.open(arquivo, mode="r", metadata_errors="ignore")` em `audio.py`, e o PyAV 19 **removeu** esse
+parâmetro. O sintoma é enganoso: o atalho funciona, o aviso de gravação aparece, e o erro só surge
+depois — `TypeError: open() got an unexpected keyword argument 'metadata_errors'`. Como o
+`faster-whisper` declara só `av>=11`, o pip resolve para a 19. Use `av==18.0.0`.
+
+*Não* é problema do `huggingface-hub`: medido com hub 2.2.0 e com 1.24.0, ambos funcionam quando
+o PyAV é o 18.
 
 **Aplicativos Electron** (Chromium embutido, como muitos clientes de chat) tratam teclas de forma
 diferente do resto do sistema:
