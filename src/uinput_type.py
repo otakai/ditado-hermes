@@ -66,18 +66,19 @@ SHIFTED = {"!": "1", "@": "2", "#": "3", "$": "4", "%": "5", "&": "7", "*": "8",
 SHIFT_EXTRA = {":": 53, '"': 41, "^": 40, "<": 51, ">": 52,
                "?": 89, "|": 86}
 
-# Acentos no layout br: tecla morta + vogal, ou tecla própria (ç).
-# MEDIDO: 26 = acento agudo (á é í ó ú) | 40 = til (ã õ) e, com shift, circunflexo (ê â)
-#         39 = ç (mesma tecla do ';')
-# (código da tecla morta, vogal, exige Shift?)
-# Medido no layout br abnt2: 26 = tecla do acento agudo; 40 = tecla do til/acento circunflexo
-# (com Shift vira o circunflexo); 39 = tecla do ç.
+# Acentos no layout br abnt2, MEDIDO por sonda nesta máquina:
+#   26 = acento agudo (á é í ó ú)  |  26 COM Shift = crase (à)
+#   40 = til (ã õ)                 |  40 COM Shift = circunflexo (â ê î ô û)
+#   39 = ç (mesma tecla do ';')
+# A tupla é (tecla morta, vogal, exige Shift?). O Shift na TECLA MORTA é o que separa ã de
+# â — sem ele o circunflexo saía como til solto ("ç~ao" em vez de "ção").
 ACENTOS = {
     "á": (26, K["a"], False), "é": (26, K["e"], False), "í": (26, K["i"], False),
     "ó": (26, K["o"], False), "ú": (26, K["u"], False),
-    "â": (40, K["a"], True),  "ê": (40, K["e"], True),  "ô": (40, K["o"], True),
-    "ã": (40, K["a"], False), "õ": (40, K["o"], False),
     "à": (26, K["a"], True),
+    "ã": (40, K["a"], False), "õ": (40, K["o"], False),
+    "â": (40, K["a"], True),  "ê": (40, K["e"], True),  "î": (40, K["i"], True),
+    "ô": (40, K["o"], True),  "û": (40, K["u"], True),
     "ç": (39, None, False),
 }
 
@@ -117,14 +118,24 @@ class Teclado:
     def digitar(self, texto, pausa=0.012, pausa_acento=0.05):
         """Digita o texto. Caracteres fora do mapa são ignorados."""
         for ch in texto:
-            if ch in ACENTOS:
-                base, vogal, com_shift = ACENTOS[ch]
-                if vogal is None:            # ç: tecla própria
-                    self.key(base, shift=com_shift)
+            if ch in ACENTOS or (ch.isupper() and ch.lower() in ACENTOS):
+                # maiúscula acentuada ("ATENÇÃO") não está no mapa: mesma tecla morta,
+                # com Shift na VOGAL. Sem isto o caractere caía no "fora do mapa" e
+                # desaparecia em silêncio — texto em caixa alta perdia as letras com acento.
+                maiuscula = ch.isupper()
+                base, vogal, com_shift = ACENTOS[ch.lower()]
+                if vogal is None:            # ç / Ç: tecla própria
+                    self.key(base, shift=com_shift or maiuscula)
                 else:                        # tecla morta: precisa de folga antes da vogal
                     self.key(base, shift=com_shift)
                     time.sleep(pausa_acento)
-                    self.key(vogal)
+                    self.key(vogal, shift=maiuscula)
+            elif ch == "~":
+                # a tecla 40 é morta (ã õ): "~" sozinho é 40 + espaço. Sem isso o caractere
+                # cai no "fora do mapa" e é ignorado em silêncio — "~/x" virava "/x".
+                self.key(40)
+                time.sleep(pausa_acento)
+                self.key(K[" "])
             elif ch in SHIFT_EXTRA:
                 self.key(SHIFT_EXTRA[ch], shift=True)
             elif ch in SHIFTED:
